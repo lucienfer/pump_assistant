@@ -4,6 +4,7 @@ import getProvider from "./utils/getProvider";
 import Alert from "./components/Alert";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
+import AIResponse from "./types/AIResponseType";
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -11,7 +12,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  //const [responses, setResponses] = useState<AgentResponse[]>([]);
+  const [responses, setResponses] = useState<AIResponse[]>([]);
   //const [assistant] = useState<SimpleAssistant>(() => new SimpleAssistant());
   const provider = getProvider();
 
@@ -157,47 +158,41 @@ function App() {
 
         <SearchBar
           isConnected={isConnected}
-          provider={provider}
-          wallet={wallet}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           isLoading={isLoading}
+          responses={responses}
+          setResponses={setResponses}
         />
 
         {/* Zone d'affichage des réponses */}
         <div className="space-y-4">
-          {/* {responses.map((response, index) => (
-        <div
-          key={index}
-          className={`p-4 rounded-lg shadow ${
-            response.type === 'error' 
-              ? 'bg-red-50 border border-red-200' 
-              : response.type === 'transaction'
-              ? 'bg-green-50 border border-green-200'
-              : 'bg-white'
-          }`}
-        >
-          <div className="flex justify-between items-start">
-            <span className={`text-sm ${
-              response.type === 'error' 
-                ? 'text-red-600' 
-                : response.type === 'transaction'
-                ? 'text-green-600'
-                : 'text-gray-600'
-            }`}>
-              {response.message}
-            </span>
-            <span className="text-xs text-gray-400">
-              {response.timestamp.toLocaleTimeString()}
-            </span>
-          </div>
-          {response.details && (
-            <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-x-auto">
-              {JSON.stringify(response.details, null, 2)}
-            </pre>
-          )}
-        </div>
-      ))} */}
+          {responses.map((response, index) => (
+            <div
+              key={index}
+              className={`p-4 rounded-lg shadow ${
+                response.type === "error"
+                  ? "bg-red-50 border border-red-200"
+                  : response.type === "transaction"
+                  ? "bg-green-50 border border-green-200"
+                  : "bg-white"
+              }`}
+            >
+              <div className="flex justify-between items-start">
+                <span
+                  className={`text-sm ${
+                    response.type === "error"
+                      ? "text-red-600"
+                      : response.type === "transaction"
+                      ? "text-green-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {response.message}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {!isConnected && (

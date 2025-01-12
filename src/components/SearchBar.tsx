@@ -1,40 +1,49 @@
 import { Loader, Search, Send } from "lucide-react";
-import createTransaction from "../utils/createTransaction";
-import signAndSendTransaction from "../utils/signAndSendTransaction";
-import { PhantomProvider } from "../types/PhantomProviderType";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { llm } from "../config";
+import AIResponse from "../types/AIResponseType";
 
 interface SearchBarProps {
   isConnected: boolean;
-  provider: PhantomProvider | undefined;
-  wallet: string;
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   isLoading: boolean;
+  responses: AIResponse[];
+  setResponses: React.Dispatch<React.SetStateAction<AIResponse[]>>;
 }
+
+const prompt = ChatPromptTemplate.fromMessages([
+  [
+    "system",
+    "You are a helpful assistant that translates {input_language} to {output_language}.",
+  ],
+  ["human", "{input}"],
+]);
 
 const SearchBar = ({
   isConnected,
-  provider,
-  wallet,
   searchQuery,
   setSearchQuery,
   isLoading,
+  responses,
+  setResponses,
 }: SearchBarProps) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const transaction = await createTransaction(
-      wallet,
-      "EKw9722Bgooxxxb15J1QHkUX78LxwAXopDVvv68WGWcX"
-    );
-    if (typeof provider === "undefined") {
-      return;
-    }
-    const tx_addr = signAndSendTransaction(transaction, provider);
-
-    console.log(
-      "Transaction Signature:",
-      `https://solana.fm/tx/${tx_addr}?cluster=devnet-solana`
-    );
+    const chain = prompt.pipe(llm);
+    const response = await chain.invoke({
+      input_language: "French",
+      output_language: "English",
+      input: searchQuery,
+    });
+    const responseAI: AIResponse = {
+      message: response.content.toString(),
+      type: "transaction",
+    };
+    const tmp = responses;
+    tmp.push(responseAI);
+    setResponses(tmp);
+    console.log(tmp[0]);
   };
 
   return (
